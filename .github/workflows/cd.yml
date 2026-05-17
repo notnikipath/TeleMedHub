@@ -1,0 +1,36 @@
+name: TeleMedHub CD
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-images:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - api-gateway
+          - appointment-service
+          - consultation-service
+          - emr-service
+          - device-integration
+          - analytics-service
+          - notification-service
+          - billing-service
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./${{ matrix.service }}/Dockerfile
+          push: false
+          tags: telemedhub/${{ matrix.service }}:latest
